@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>He@ven Product Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>He@ven Product Verification</h1>
+    <input type="text" id="productId" placeholder="Enter Product ID">
+    <button onclick="verifyProduct()">Check</button>
+    <div id="result"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script>
+        // Replace with your contract's ABI and address
+        const contractABI = [
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "products",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "registerProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            }
+        ],
+        "name": "verifyProduct",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
+        const contractAddress = "0x9BD2B2b5ab739D57FB51C5D65456058a76e89198";
+
+        let web3;
+        let contract;
+
+        // Connect to MetaMask on page load
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.enable(); // Request user permission
+                } catch (error) {
+                    console.error("User denied account access");
+                }
+            } else {
+                alert("Please install MetaMask to use this app!");
+            }
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+        });
+
+        // Verify product function
+        async function verifyProduct() {
+            const productId = document.getElementById('productId').value;
+            if (!productId) {
+                alert("Please enter a product ID");
+                return;
+            }
+
+            try {
+                const result = await contract.methods.verifyProduct(productId).call();
+                const [isGenuine, productionDate, model] = result;
+                if (isGenuine) {
+                    document.getElementById('result').innerHTML = 
+                        `Product is genuine.<br>Production Date: ${productionDate}<br>Model: ${model}`;
+                } else {
+                    document.getElementById('result').innerHTML = "Product is not genuine.";
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error verifying product. Check console for details.");
+            }
+        }
+    </script>
+</body>
+</html>
