@@ -1,11 +1,11 @@
 # He@ven Product Verification System
 
 ELEC S431F project
-
- - LEUNG Pak Hei (13430941)
- - YEUNG Yiu Ming (13448839)
- - LEUNG Kim Hung (12895666)
- - CHUNG Ching Fan (12889101)
+__
+LEUNG Pak Hei (13430941)__
+YEUNG Yiu Ming (13448839)__
+LEUNG Kim Hung (12895666)__
+CHUNG Ching Fan (12889101)__
 
 This is a blockchain project built for "He@ven," a fictional company, to register and verify products using the Sepolia Ethereum test network. It uses a smart contract to store product details (product ID, production date, and model) and provides a web interface for the company to register products and users to verify authenticity via QR codes.
 
@@ -17,12 +17,12 @@ This is a blockchain project built for "He@ven," a fictional company, to registe
 - **Styled Interface**: Includes a company logo and clean design for the verification page.
 
 ## Project Structure
-product-verification/
-├── index.html              # Verification page for users
-├── register.html           # Registration page for He@ven
-├── logo.png                # Company logo (150x75 pixels recommended)
-├── ProductVerification.sol # Smart contract source code
-└── README.md               # This file
+product-verification/__
+├── index.html              # Verification page for users__
+├── register.html           # Registration page for He@ven__
+├── logo.png                # Company logo (150x75 pixels recommended)__
+├── ProductVerification.sol # Smart contract source code__
+└── README.md               # This file__
 
 ## Usage
 Register a Product
