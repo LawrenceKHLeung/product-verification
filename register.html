@@ -172,6 +172,7 @@
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
                     accounts = await web3.eth.getAccounts();
                     contract = new web3.eth.Contract(contractABI, contractAddress);
+                    console.log("Connected to MetaMask, account:", accounts[0]);
                 } catch (error) {
                     console.error("User denied account access:", error);
                     alert("Please connect MetaMask to use this app.");
@@ -192,12 +193,20 @@
             }
 
             try {
-                await contract.methods.registerProduct(productId, productionDate, model)
+                console.log("Attempting to register product:", productId);
+                document.getElementById('message').innerHTML = "Registering product, please wait...";
+
+                // Send transaction and wait for confirmation
+                const tx = await contract.methods.registerProduct(productId, productionDate, model)
                     .send({ from: accounts[0] });
-                document.getElementById('message').innerHTML = "Product registered successfully!";
+
+                console.log("Transaction successful:", tx.transactionHash);
+                document.getElementById('message').innerHTML = 
+                    `Product registered successfully! Tx: ${tx.transactionHash}`;
 
                 // Generate QR code
                 const verifyUrl = `${baseUrl}?id=${productId}`;
+                console.log("Generating QR code for URL:", verifyUrl);
                 document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
                 new QRCode(document.getElementById('qrcode'), {
                     text: verifyUrl,
@@ -205,8 +214,9 @@
                     height: 128
                 });
             } catch (error) {
-                console.error("Registration error:", error);
-                alert("Error registering product. Are you the owner?");
+                console.error("Error during registration:", error);
+                document.getElementById('message').innerHTML = "Registration failed.";
+                alert("Error registering product: " + error.message);
             }
         }
     </script>
