@@ -17,6 +17,9 @@
             margin-top: 20px;
             font-weight: bold;
         }
+        #qrcode {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -26,8 +29,10 @@
     <input type="text" id="model" placeholder="Model"><br>
     <button onclick="registerProduct()">Register</button>
     <div id="message"></div>
+    <div id="qrcode"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
     <script>
         // Replace with your contract's ABI and address
         const contractABI = [
@@ -35,6 +40,54 @@
         "inputs": [],
         "stateMutability": "nonpayable",
         "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "ProductRegistered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "registerProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "inputs": [],
@@ -79,29 +132,6 @@
                 "internalType": "string",
                 "name": "productId",
                 "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "productionDate",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "model",
-                "type": "string"
-            }
-        ],
-        "name": "registerProduct",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "productId",
-                "type": "string"
             }
         ],
         "name": "verifyProduct",
@@ -126,29 +156,31 @@
         "type": "function"
     }
 ];
-        const contractAddress = "0x9BD2B2b5ab739D57FB51C5D65456058a76e89198";
+        const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
+
+        // Replace with your GitHub Pages URL
+        const baseUrl = "https://lawrencekhleung.github.io/product-verification/";
 
         let web3;
         let contract;
         let accounts;
 
-        // Connect to MetaMask on page load
         window.addEventListener('load', async () => {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 try {
-                    await window.ethereum.enable();
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
                     accounts = await web3.eth.getAccounts();
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
                 } catch (error) {
-                    console.error("User denied account access");
+                    console.error("User denied account access:", error);
+                    alert("Please connect MetaMask to use this app.");
                 }
             } else {
                 alert("Please install MetaMask to use this app!");
             }
-            contract = new web3.eth.Contract(contractABI, contractAddress);
         });
 
-        // Register product function
         async function registerProduct() {
             const productId = document.getElementById('productId').value;
             const productionDate = document.getElementById('productionDate').value;
@@ -163,8 +195,17 @@
                 await contract.methods.registerProduct(productId, productionDate, model)
                     .send({ from: accounts[0] });
                 document.getElementById('message').innerHTML = "Product registered successfully!";
+
+                // Generate QR code
+                const verifyUrl = `${baseUrl}?id=${productId}`;
+                document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
+                new QRCode(document.getElementById('qrcode'), {
+                    text: verifyUrl,
+                    width: 128,
+                    height: 128
+                });
             } catch (error) {
-                console.error(error);
+                console.error("Registration error:", error);
                 alert("Error registering product. Are you the owner?");
             }
         }

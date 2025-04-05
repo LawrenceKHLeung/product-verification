@@ -32,6 +32,54 @@
         "type": "constructor"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "ProductRegistered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "registerProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "owner",
         "outputs": [
@@ -74,29 +122,6 @@
                 "internalType": "string",
                 "name": "productId",
                 "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "productionDate",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "model",
-                "type": "string"
-            }
-        ],
-        "name": "registerProduct",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "productId",
-                "type": "string"
             }
         ],
         "name": "verifyProduct",
@@ -121,19 +146,25 @@
         "type": "function"
     }
 ];
-        const contractAddress = "0x9BD2B2b5ab739D57FB51C5D65456058a76e89198";
+        const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
 
         let web3;
         let contract;
 
-        // Connect to MetaMask on page load
         window.addEventListener('load', async () => {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 try {
-                    // Modern way to request account access
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
                     contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                    // Check for product ID in URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const productId = urlParams.get('id');
+                    if (productId) {
+                        document.getElementById('productId').value = productId;
+                        verifyProduct(); // Auto-verify if ID is present
+                    }
                 } catch (error) {
                     console.error("User denied account access or connection failed:", error);
                     alert("Please connect MetaMask to use this app.");
@@ -143,7 +174,6 @@
             }
         });
 
-        // Verify product function
         async function verifyProduct() {
             const productId = document.getElementById('productId').value;
             if (!productId) {
@@ -153,9 +183,9 @@
 
             try {
                 const result = await contract.methods.verifyProduct(productId).call();
-                const isGenuine = result[0];         // bool
-                const productionDate = result[1];    // string
-                const model = result[2];             // string
+                const isGenuine = result[0];
+                const productionDate = result[1];
+                const model = result[2];
 
                 if (isGenuine) {
                     document.getElementById('result').innerHTML = 
