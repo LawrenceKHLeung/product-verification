@@ -131,14 +131,16 @@
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 try {
-                    await window.ethereum.enable(); // Request user permission
+                    // Modern way to request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
                 } catch (error) {
-                    console.error("User denied account access");
+                    console.error("User denied account access or connection failed:", error);
+                    alert("Please connect MetaMask to use this app.");
                 }
             } else {
                 alert("Please install MetaMask to use this app!");
             }
-            contract = new web3.eth.Contract(contractABI, contractAddress);
         });
 
         // Verify product function
@@ -151,7 +153,10 @@
 
             try {
                 const result = await contract.methods.verifyProduct(productId).call();
-                const [isGenuine, productionDate, model] = result;
+                const isGenuine = result[0];         // bool
+                const productionDate = result[1];    // string
+                const model = result[2];             // string
+
                 if (isGenuine) {
                     document.getElementById('result').innerHTML = 
                         `Product is genuine.<br>Production Date: ${productionDate}<br>Model: ${model}`;
@@ -159,7 +164,7 @@
                     document.getElementById('result').innerHTML = "Product is not genuine.";
                 }
             } catch (error) {
-                console.error(error);
+                console.error("Verification error:", error);
                 alert("Error verifying product. Check console for details.");
             }
         }
