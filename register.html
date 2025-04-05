@@ -32,7 +32,7 @@
     <div id="qrcode"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"></script>
     <script>
         // Replace with your contract's ABI and address
         const contractABI = [
@@ -192,11 +192,10 @@
                 return;
             }
 
+            document.getElementById('message').innerHTML = "Registering product, please wait...";
+
             try {
                 console.log("Attempting to register product:", productId);
-                document.getElementById('message').innerHTML = "Registering product, please wait...";
-
-                // Send transaction and wait for confirmation
                 const tx = await contract.methods.registerProduct(productId, productionDate, model)
                     .send({ from: accounts[0] });
 
@@ -204,15 +203,11 @@
                 document.getElementById('message').innerHTML = 
                     `Product registered successfully! Tx: ${tx.transactionHash}`;
 
-                // Generate QR code
+                // Generate QR code after successful registration
                 const verifyUrl = `${baseUrl}?id=${productId}`;
                 console.log("Generating QR code for URL:", verifyUrl);
                 document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
-                new QRCode(document.getElementById('qrcode'), {
-                    text: verifyUrl,
-                    width: 128,
-                    height: 128
-                });
+                new QRCode(document.getElementById('qrcode'), verifyUrl); // Simplified API
             } catch (error) {
                 console.error("Error during registration:", error);
                 document.getElementById('message').innerHTML = "Registration failed.";
