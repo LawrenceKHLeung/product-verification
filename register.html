@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>He@ven Product Registration</title>
     <style>
+        /* Styles the entire page */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
         }
+        /* Styles the input field */
         input {
             margin: 5px;
         }
@@ -19,22 +21,31 @@
         }
         #qrcode {
             margin-top: 20px;
-            text-align: center;
         }
     </style>
 </head>
 <body>
+    <!-- Main heading -->
     <h1>He@ven Product Registration</h1>
+    <!-- Input field for entering the product ID -->
     <input type="text" id="productId" placeholder="Product ID"><br>
+    <!-- Input field for entering the productuction date -->
     <input type="text" id="productionDate" placeholder="Production Date"><br>
+    <!-- Input field for entering the model -->
     <input type="text" id="model" placeholder="Model"><br>
+    <!-- Button to trigger registration -->
     <button onclick="registerProduct()">Register</button>
+    <!-- Div to display the message -->
     <div id="message"></div>
+    <!-- Div to display the qrcode -->
     <div id="qrcode"></div>
 
+    <!-- Load Web3.js to interact with Ethereum blockchain -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Load QRCode.js to generate QR codes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"></script>
     <script>
+        // Contract ABI (Application Binary Interface) defines how to interact with the smart contract
         const contractABI = [
     {
         "inputs": [],
@@ -156,43 +167,65 @@
         "type": "function"
     }
 ];
+        // Address of the deployed smart contract on Sepolia
         const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
+        // Base URL for the verification page, used in QR code
         const baseUrl = "https://lawrencekhleung.github.io/product-verification/";
 
+        // Global variables for Web3 instance, contract instance, and user accounts
         let web3;
         let contract;
         let accounts;
 
+        // Event listener runs when the page loads
         window.addEventListener('load', async () => {
+            // Check if MetaMask (or another Ethereum provider) is available in the browser
             if (window.ethereum) {
+                // Initialize Web3 with the MetaMask provider
                 web3 = new Web3(window.ethereum);
+                // Request user permission to connect their MetaMask account
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
+                // Get the list of connected accounts (first one is typically active)
                 accounts = await web3.eth.getAccounts();
+                // Create a contract instance using the ABI and address
                 contract = new web3.eth.Contract(contractABI, contractAddress);
+                // Log the connected account for debugging
                 console.log("Connected to MetaMask, account:", accounts[0]);
             } else {
+                // Alert user if MetaMask isn’t detected
                 alert("Please install MetaMask to use this app!");
             }
         });
 
+        // Function to register a new product, called when the "Register" button is clicked
         async function registerProduct() {
+            // Get input values from the form
             const productId = document.getElementById('productId').value;
             const productionDate = document.getElementById('productionDate').value;
             const model = document.getElementById('model').value;
 
+            // Show a waiting message while the transaction processes
             document.getElementById('message').innerHTML = "Registering product, please wait...";
 
+            // Log the attempt for debugging
             console.log("Attempting to register product:", productId);
+            // Send the transaction to the blockchain to register the product
             const tx = await contract.methods.registerProduct(productId, productionDate, model)
-                .send({ from: accounts[0] });
+                .send({ from: accounts[0] }); // Use the first connected account as the sender
 
+            // Log the successful transaction hash
             console.log("Transaction successful:", tx.transactionHash);
+            // Update the message with the transaction hash for confirmation
             document.getElementById('message').innerHTML = 
                 `Product registered successfully! Tx: ${tx.transactionHash}`;
 
+            // Create the URL for the verification page with the product ID as a query parameter
             const verifyUrl = `${baseUrl}?id=${productId}`;
+            // Log the QR code URL for debugging
             console.log("Generating QR code for URL:", verifyUrl);
-            document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
+            // Clear any previous QR code
+            document.getElementById('qrcode').innerHTML = "";
+            // Generate a new QR code linking to the verification URL
             new QRCode(document.getElementById('qrcode'), verifyUrl);
         }
     </script>
