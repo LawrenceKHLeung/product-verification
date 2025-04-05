@@ -34,7 +34,6 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"></script>
     <script>
-        // Replace with your contract's ABI and address
         const contractABI = [
     {
         "inputs": [],
@@ -157,8 +156,6 @@
     }
 ];
         const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
-
-        // Replace with your GitHub Pages URL
         const baseUrl = "https://lawrencekhleung.github.io/product-verification/";
 
         let web3;
@@ -168,15 +165,10 @@
         window.addEventListener('load', async () => {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
-                try {
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    accounts = await web3.eth.getAccounts();
-                    contract = new web3.eth.Contract(contractABI, contractAddress);
-                    console.log("Connected to MetaMask, account:", accounts[0]);
-                } catch (error) {
-                    console.error("User denied account access:", error);
-                    alert("Please connect MetaMask to use this app.");
-                }
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                accounts = await web3.eth.getAccounts();
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+                console.log("Connected to MetaMask, account:", accounts[0]);
             } else {
                 alert("Please install MetaMask to use this app!");
             }
@@ -187,32 +179,20 @@
             const productionDate = document.getElementById('productionDate').value;
             const model = document.getElementById('model').value;
 
-            if (!productId || !productionDate || !model) {
-                alert("Please fill in all fields");
-                return;
-            }
-
             document.getElementById('message').innerHTML = "Registering product, please wait...";
 
-            try {
-                console.log("Attempting to register product:", productId);
-                const tx = await contract.methods.registerProduct(productId, productionDate, model)
-                    .send({ from: accounts[0] });
+            console.log("Attempting to register product:", productId);
+            const tx = await contract.methods.registerProduct(productId, productionDate, model)
+                .send({ from: accounts[0] });
 
-                console.log("Transaction successful:", tx.transactionHash);
-                document.getElementById('message').innerHTML = 
-                    `Product registered successfully! Tx: ${tx.transactionHash}`;
+            console.log("Transaction successful:", tx.transactionHash);
+            document.getElementById('message').innerHTML = 
+                `Product registered successfully! Tx: ${tx.transactionHash}`;
 
-                // Generate QR code after successful registration
-                const verifyUrl = `${baseUrl}?id=${productId}`;
-                console.log("Generating QR code for URL:", verifyUrl);
-                document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
-                new QRCode(document.getElementById('qrcode'), verifyUrl); // Simplified API
-            } catch (error) {
-                console.error("Error during registration:", error);
-                document.getElementById('message').innerHTML = "Registration failed.";
-                alert("Error registering product: " + error.message);
-            }
+            const verifyUrl = `${baseUrl}?id=${productId}`;
+            console.log("Generating QR code for URL:", verifyUrl);
+            document.getElementById('qrcode').innerHTML = ""; // Clear previous QR code
+            new QRCode(document.getElementById('qrcode'), verifyUrl);
         }
     </script>
 </body>
