@@ -26,9 +26,129 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
     <script>
         // Contract ABI defines how to interact with the smart contract
-        const contractABI = [ /* Paste your ABI here */ ];
+        const contractABI = [
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "ProductRegistered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "name": "registerProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "products",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "productionDate",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "model",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "productId",
+                "type": "string"
+            }
+        ],
+        "name": "verifyProduct",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
         // Address of the deployed smart contract on Sepolia
-        const contractAddress = "0xYourNewContractAddressHere";
+        const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
 
         // Global variables for Web3 instance and contract instance
         let web3;
