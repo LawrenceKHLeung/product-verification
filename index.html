@@ -7,25 +7,78 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            margin-top: 50px;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin: 0 0 20px 0;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
         #result {
             margin-top: 20px;
-            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+        }
+        #result.success {
+            color: #28a745;
+        }
+        #result.error {
+            color: #dc3545;
         }
     </style>
 </head>
 <body>
-    <h1>He@ven Product Verification</h1>
-    <input type="text" id="productId" placeholder="Enter Product ID">
-    <button onclick="verifyProduct()">Check</button>
-    <div id="result"></div>
+    <div class="container">
+        <img src="logo.jpg" alt="He@ven Logo" class="logo">
+        <h1>He@ven Product Verification</h1>
+        <input type="text" id="productId" placeholder="Enter Product ID">
+        <button onclick="verifyProduct()">Check</button>
+        <div id="result"></div>
+    </div>
 
-    <!-- Load Web3.js to interact with Ethereum blockchain -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
     <script>
-        // Contract ABI defines how to interact with the smart contract
         const contractABI = [
     {
         "inputs": [],
@@ -147,65 +200,34 @@
         "type": "function"
     }
 ];
-        // Address of the deployed smart contract on Sepolia
         const contractAddress = "0xbe2f8732F445104Ad80099E30Ec2b81a411b602d";
 
-        // Global variables for Web3 instance and contract instance
         let web3;
         let contract;
 
-        // Function to detect if the user is on a mobile device
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // Event listener runs when the page loads
         window.addEventListener('load', async () => {
-            // Check if MetaMask (or another Ethereum provider) is available
             if (window.ethereum) {
-                // Initialize Web3 with the MetaMask provider
                 web3 = new Web3(window.ethereum);
                 try {
-                    // Request user permission to connect their MetaMask account
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    // Create a contract instance using the ABI and address
                     contract = new web3.eth.Contract(contractABI, contractAddress);
 
-                    // Check for a product ID in the URL (e.g., from QR code scan)
                     const urlParams = new URLSearchParams(window.location.search);
                     const productId = urlParams.get('id');
                     if (productId) {
-                        // Pre-fill the input field with the ID from the URL
                         document.getElementById('productId').value = productId;
-                        // Automatically verify the product
                         verifyProduct();
                     }
                 } catch (error) {
-                    // Log connection errors (e.g., user denies access)
                     console.error("User denied account access or connection failed:", error);
                     alert("Please connect MetaMask to use this app.");
                 }
             } else {
-                // If no Ethereum provider is detected
-                if (isMobileDevice()) {
-                    // On mobile, prompt user to open in MetaMask app
-                    const currentUrl = window.location.href;
-                    const deepLink = `https://metamask.app.link/dapp/${currentUrl.replace('https://', '')}`;
-                    document.body.innerHTML = `
-                        <h1>Verification Requires MetaMask</h1>
-                        <p>Please open this page in the MetaMask app.</p>
-                        <a href="${deepLink}">Click here to open in MetaMask</a>
-                    `;
-                } else {
-                    // On desktop, prompt to install MetaMask
-                    alert("Please install MetaMask to use this app!");
-                }
+                alert("Please install MetaMask to use this app!");
             }
         });
 
-        // Function to verify a product, called by button click or URL parameter
         async function verifyProduct() {
-            // Get the product ID from the input field
             const productId = document.getElementById('productId').value;
             if (!productId) {
                 alert("Please enter a product ID");
@@ -213,22 +235,21 @@
             }
 
             try {
-                // Call the smart contract’s verifyProduct function (read-only, no gas cost)
                 const result = await contract.methods.verifyProduct(productId).call();
-                // Extract return values: isGenuine (bool), productionDate (string), model (string)
                 const isGenuine = result[0];
                 const productionDate = result[1];
                 const model = result[2];
+                const resultDiv = document.getElementById('result');
 
-                // Display result based on whether the product is genuine
                 if (isGenuine) {
-                    document.getElementById('result').innerHTML = 
+                    resultDiv.innerHTML = 
                         `Product is genuine.<br>Production Date: ${productionDate}<br>Model: ${model}`;
+                    resultDiv.className = "success";
                 } else {
-                    document.getElementById('result').innerHTML = "Product is not genuine.";
+                    resultDiv.innerHTML = "Product is not genuine.";
+                    resultDiv.className = "error";
                 }
             } catch (error) {
-                // Log and alert any verification errors
                 console.error("Verification error:", error);
                 alert("Error verifying product. Check console for details.");
             }
